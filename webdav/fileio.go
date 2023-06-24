@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/alessio/shellescape"
 	"github.com/lainio/err2"
@@ -39,9 +38,7 @@ func (f *File) Close() error {
 	f.cursor = 0
 	f.init, f.err = &sync.Once{}, nil
 	if conn := f.conn; conn != nil {
-		time.AfterFunc(10*time.Second, func() {
-			conn.Close()
-		})
+		conn.Close()
 	}
 	return nil
 }
