@@ -37,7 +37,10 @@ func OpenFile(sess bash.Session, name string) webdav.File {
 func (f *File) Close() error {
 	f.cursor = 0
 	f.init, f.err = &sync.Once{}, nil
-	return f.conn.Close()
+	if f.conn != nil {
+		return f.conn.Close()
+	}
+	return nil
 }
 func (f *File) Read(p []byte) (n int, err error) {
 	f.init.Do(func() {
