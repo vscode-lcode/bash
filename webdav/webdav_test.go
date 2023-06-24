@@ -1,7 +1,10 @@
 package webdav
 
 import (
+	"fmt"
+	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"testing"
@@ -11,6 +14,7 @@ import (
 	"github.com/vscode-lcode/bash"
 	utils "github.com/vscode-lcode/bash/internal/test-utils"
 	"github.com/vscode-lcode/bash/server"
+	"golang.org/x/net/webdav"
 )
 
 var client bash.Session
@@ -47,4 +51,25 @@ func TestClient(t *testing.T) {
 	}
 	s := string(b)
 	t.Log(s)
+}
+
+func TestWebdav(t *testing.T) {
+	if !utils.Debug {
+		return
+	}
+
+	h := &webdav.Handler{
+		FileSystem: NewFileSystem(client),
+		LockSystem: webdav.NewMemLS(),
+		Logger: func(r *http.Request, err error) {
+			if err != nil {
+				log.Printf("WEBDAV [%s]: %s, ERROR: %s\n", r.Method, r.URL, err)
+			} else {
+				log.Printf("WEBDAV [%s]: %s \n", r.Method, r.URL)
+			}
+		},
+	}
+
+	fmt.Println("webdav://127.0.0.1:43499")
+	try.To(http.ListenAndServe("127.0.0.1:43499", h))
 }
