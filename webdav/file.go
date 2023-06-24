@@ -33,7 +33,7 @@ func (f *File) Readdir(n int) (files []fs.FileInfo, err error) {
 	return
 }
 func (f *File) Stat() (finfo fs.FileInfo, err error) {
-	defer err2.Handle(&err)
+	defer err2.Handle(&err, func() {})
 	cmd := fmt.Sprintf("TZ=UTC0 ls -Ald --full-time %s", shellescape.Quote(f.name))
 	b := try.To1(f.Run(cmd))
 	if string(b) == "" {
