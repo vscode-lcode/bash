@@ -28,6 +28,12 @@ func (c *FileSystem) Mkdir(ctx context.Context, name string, perm os.FileMode) (
 }
 func (c *FileSystem) OpenFile(ctx context.Context, name string, flag int, perm os.FileMode) (f webdav.File, err error) {
 	f = OpenFile(c.Session, name)
+	if flag&os.O_CREATE != 0 {
+		if _, err = f.Write([]byte{}); err != nil {
+			return
+		}
+		f.(*File).Close()
+	}
 	return
 }
 func (c *FileSystem) RemoveAll(ctx context.Context, name string) (err error) {
