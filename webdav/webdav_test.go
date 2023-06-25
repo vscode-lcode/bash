@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -41,6 +42,9 @@ func TestMain(m *testing.M) {
 		client = c
 		break
 	}
+	if client == nil {
+		panic("client is not ready")
+	}
 	m.Run()
 }
 
@@ -70,6 +74,7 @@ func TestWebdav(t *testing.T) {
 		},
 	}
 
-	fmt.Println("webdav://127.0.0.1:43499")
+	dir := try.To1(filepath.Abs(testDirpath))
+	fmt.Printf("webdav://127.0.0.1:43499%s/", dir)
 	try.To(http.ListenAndServe("127.0.0.1:43499", h))
 }
