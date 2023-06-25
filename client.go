@@ -111,7 +111,7 @@ func (c *Client) exec(hdr Header, cmd string) {
 		fmt.Sprintf("0>&1"),
 		fmt.Sprintf("4> >(echo %s) 4>&1", uniqueID),
 	}, " ")
-	cmd = fmt.Sprintf("%s 1> >(0>&1 %s) &", f, cmd)
+	cmd = fmt.Sprintf(" %s 1> >(0>&1 %s) &", f, cmd)
 	fmt.Fprintln(c.conn, cmd)
 }
 
