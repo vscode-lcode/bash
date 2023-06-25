@@ -122,9 +122,15 @@ func (hub *Hub) NewClientSession(conn net.Conn) (err error) {
 		defer onClose()
 	}
 
-	// arrived only when client exit
-	_, err = io.ReadAll(conn)
-	return
+	// drop stdout
+	// check if shell is running and exit
+	var drop = make([]byte, 0, 512)
+	for {
+		_, err = conn.Read(drop)
+		if err != nil {
+			return
+		}
+	}
 }
 
 func (hub *Hub) genClientID() uint64 {
