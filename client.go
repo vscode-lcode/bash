@@ -1,7 +1,6 @@
 package bash
 
 import (
-	"bufio"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -146,10 +145,14 @@ func (h *Header) encode(id uint32, code uint32) {
 
 func (c *Client) HandleConn(stream io.ReadWriteCloser) (err error) {
 	defer err2.Handle(&err)
+
 	var hdr Header
-	r := bufio.NewReader(stream)
-	line, _ := try.To2(r.ReadLine())
-	try.To1(hex.Decode(hdr[:], line))
+	r := hex.NewDecoder(io.LimitReader(stream, headerSize))
+	try.To1(io.ReadFull(r, hdr[:]))
+
+	var sep [1]byte
+	try.To1(io.ReadFull(stream, sep[:]))
+
 	if v := hdr.Version(); v != 0 {
 		return fmt.Errorf("expect header version: 0, but got %d", v)
 	}
