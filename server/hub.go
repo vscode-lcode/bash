@@ -42,11 +42,11 @@ func (hub *Hub) Close() (err error) {
 func (hub *Hub) Serve(l net.Listener) (err error) {
 	for {
 		conn := try.To1(l.Accept())
-		go hub.serve(conn)
+		go hub.ServeConn(conn)
 	}
 }
 
-func (hub *Hub) serve(conn net.Conn) (err error) {
+func (hub *Hub) ServeConn(conn net.Conn) (err error) {
 	defer err2.Handle(&err)
 	var w = make(chan Header)
 	time.AfterFunc(200*time.Millisecond, func() {
