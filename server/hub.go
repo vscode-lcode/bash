@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -47,25 +48,28 @@ func (hub *Hub) Serve(l net.Listener) (err error) {
 }
 
 func (hub *Hub) ServeConn(conn net.Conn) (err error) {
-	defer err2.Handle(&err)
-	var w = make(chan Header)
+	defer err2.Handle(&err, func() {
+		conn.Close()
+	})
+	var h Header
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
 	time.AfterFunc(200*time.Millisecond, func() {
-		close(w)
+		defer cancel()
+		h.encodeMsgType(MsgInitSession)
 	})
 	go func() {
+		defer cancel()
 		r := hex.NewDecoder(io.LimitReader(conn, headerSize))
-		var hdr Header
-		_, err := io.ReadFull(r, hdr[:])
-		if err != nil {
+		if _, err := io.ReadFull(r, h[:]); err != nil {
 			return
 		}
-		w <- hdr
 	}()
-	hdr, ok := <-w
-	if !ok || hdr.MsgType() == MsgInitSession {
+	<-ctx.Done()
+	if h.MsgType() == MsgInitSession {
 		return hub.NewClientSession(conn)
 	}
-	client := try.To1(hub.getClient(hdr))
+	client := try.To1(hub.getClient(h))
 	try.To(client.HandleConn(conn))
 	return
 }

@@ -27,6 +27,10 @@ func (h *Header) encode(id uint64) {
 	binary.BigEndian.PutUint64(h[4:12], id)
 }
 
+func (h *Header) encodeMsgType(msgType MsgType) {
+	h[1] = byte(msgType)
+}
+
 func (h *Header) String() string {
 	return hex.EncodeToString(h[:])
 }
