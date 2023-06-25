@@ -56,6 +56,9 @@ func (hub *Hub) ServeConn(conn net.Conn) (err error) {
 	ctx, cancel := context.WithCancel(ctx)
 	time.AfterFunc(200*time.Millisecond, func() {
 		defer cancel()
+		if err := ctx.Err(); err != nil {
+			return
+		}
 		h.encodeMsgType(MsgInitSession)
 	})
 	go func() {
