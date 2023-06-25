@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lainio/err2/assert"
 	"github.com/lainio/err2/try"
 	"github.com/vscode-lcode/bash"
 	utils "github.com/vscode-lcode/bash/internal/test-utils"
@@ -55,6 +56,7 @@ func TestClient(t *testing.T) {
 	}
 	s := string(b)
 	t.Log(s)
+	assert.Equal(s, "hello")
 }
 
 func TestWebdav(t *testing.T) {
