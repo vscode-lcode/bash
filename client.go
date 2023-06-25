@@ -1,6 +1,7 @@
 package bash
 
 import (
+	"bufio"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -109,7 +110,7 @@ func (c *Client) exec(hdr Header, cmd string) {
 	f := strings.Join([]string{
 		fmt.Sprintf("1>/dev/tcp/%s", c.Endpoint),
 		fmt.Sprintf("0>&1"),
-		fmt.Sprintf("4> >(echo -n %s) 4>&1", uniqueID),
+		fmt.Sprintf("4> >(echo %s) 4>&1", uniqueID),
 	}, " ")
 	cmd = fmt.Sprintf("%s 1> >(0>&1 %s) &", f, cmd)
 	fmt.Fprintln(c.conn, cmd)
@@ -146,8 +147,9 @@ func (h *Header) encode(id uint32, code uint32) {
 func (c *Client) HandleConn(stream io.ReadWriteCloser) (err error) {
 	defer err2.Handle(&err)
 	var hdr Header
-	r := hex.NewDecoder(io.LimitReader(stream, headerSize))
-	try.To1(io.ReadFull(r, hdr[:]))
+	r := bufio.NewReader(stream)
+	line, _ := try.To2(r.ReadLine())
+	try.To1(hex.Decode(hdr[:], line))
 	if v := hdr.Version(); v != 0 {
 		return fmt.Errorf("expect header version: 0, but got %d", v)
 	}
