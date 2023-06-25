@@ -18,6 +18,8 @@ type Hub struct {
 	locker  *sync.RWMutex
 
 	nextID uint64
+
+	OnSessionOpen func(bash.Session) func()
 }
 
 func NewHub() *Hub {
@@ -107,6 +109,12 @@ func (hub *Hub) NewClientSession(conn net.Conn) (err error) {
 		defer hub.locker.Unlock()
 		hub.clients[id] = nil
 	}()
+
+	if hub.OnSessionOpen != nil {
+		onClose := hub.OnSessionOpen(client)
+		defer onClose()
+	}
+
 	// arrived only when client exit
 	_, err = io.ReadAll(conn)
 	return
