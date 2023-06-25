@@ -19,7 +19,7 @@ import (
 type Client struct {
 	ID       string
 	Endpoint string
-	conn     net.Conn
+	Conn     net.Conn
 
 	nextStreamID uint32
 	streamHooks  map[uint32]*StreamHook
@@ -32,14 +32,14 @@ func NewClient(conn net.Conn) *Client {
 	ap := netip.MustParseAddrPort(conn.LocalAddr().String())
 	return &Client{
 		Endpoint:    fmt.Sprintf("%s/%d", ap.Addr(), ap.Port()),
-		conn:        conn,
+		Conn:        conn,
 		streamHooks: make(map[uint32]*StreamHook),
 		locker:      &sync.RWMutex{},
 	}
 }
 
 func (c *Client) Close() (err error) {
-	return c.conn.Close()
+	return c.Conn.Close()
 }
 
 func (c *Client) Start(cmd string) (stream io.ReadWriteCloser, err error) {
@@ -112,7 +112,7 @@ func (c *Client) exec(hdr Header, cmd string) {
 		fmt.Sprintf("4> >(echo %s) 4>&1", uniqueID),
 	}, " ")
 	cmd = fmt.Sprintf(" %s 1> >(0>&1 %s) &", f, cmd)
-	fmt.Fprintln(c.conn, cmd)
+	fmt.Fprintln(c.Conn, cmd)
 }
 
 type Header [12]byte
