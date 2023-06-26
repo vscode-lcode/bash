@@ -20,6 +20,7 @@ type Client struct {
 	ID       string
 	Endpoint string
 	Conn     net.Conn
+	Timeout  time.Duration
 
 	nextStreamID uint32
 	streamHooks  map[uint32]*StreamHook
@@ -33,6 +34,7 @@ func NewClient(conn net.Conn) *Client {
 	return &Client{
 		Endpoint:    fmt.Sprintf("%s/%d", ap.Addr(), ap.Port()),
 		Conn:        conn,
+		Timeout:     2 * time.Second,
 		streamHooks: make(map[uint32]*StreamHook),
 		locker:      &sync.RWMutex{},
 	}
@@ -56,7 +58,7 @@ func (c *Client) Start(cmd string) (stream io.ReadWriteCloser, err error) {
 		defer c.locker.Unlock()
 		c.streamHooks[id] = hook
 	}()
-	time.AfterFunc(5*time.Second, func() {
+	time.AfterFunc(c.Timeout, func() {
 		c.locker.Lock()
 		defer c.locker.Unlock()
 		if !hook.handled {

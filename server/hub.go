@@ -21,12 +21,14 @@ type Hub struct {
 	nextID uint64
 
 	OnSessionOpen func(bash.Session) func()
+	Timeout       time.Duration
 }
 
 func NewHub() *Hub {
 	return &Hub{
 		clients: make(map[uint64]*bash.Client),
 		locker:  &sync.RWMutex{},
+		Timeout: 2 * time.Second,
 	}
 }
 
@@ -102,6 +104,7 @@ var (
 func (hub *Hub) NewClientSession(conn net.Conn) (err error) {
 	defer err2.Handle(&err)
 	client := bash.NewClient(conn)
+	client.Timeout = hub.Timeout
 	var id uint64 = hub.genClientID()
 	var hdr Header
 	hdr.encode(id)
