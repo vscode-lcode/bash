@@ -124,7 +124,7 @@ func (hub *Hub) NewClientSession(conn net.Conn) (err error) {
 
 	// drop stdout
 	// check if shell is running and exit
-	var drop = make([]byte, 0, 512)
+	var drop = make([]byte, 512)
 	for {
 		_, err = conn.Read(drop)
 		if err != nil {
