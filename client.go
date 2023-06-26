@@ -71,7 +71,7 @@ func (c *Client) Start(cmd string) (stream io.ReadWriteCloser, err error) {
 
 	stream, ok := <-hook.StreamCh
 	if !ok {
-		return nil, ErrStreamOpenTimeout
+		return nil, fmt.Errorf("exec cmd failed. cmd: %s. %w", cmd, ErrStreamOpenTimeout)
 	}
 	return stream, nil
 }
