@@ -119,7 +119,9 @@ func (hub *Hub) NewClientSession(conn net.Conn) (err error) {
 
 	if hub.OnSessionOpen != nil {
 		onClose := hub.OnSessionOpen(client)
-		defer onClose()
+		if onClose != nil {
+			defer onClose()
+		}
 	}
 
 	// drop stdout
